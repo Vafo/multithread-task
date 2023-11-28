@@ -21,7 +21,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Catch2)
 
-add_executable(multithread_app main.cpp)
+add_executable(concurrency_app main.cpp)
 
-target_link_libraries(multithread_app multithread_impl compiler_flags)
+target_link_libraries(concurrency_app concurrency_impl compiler_flags)
 
