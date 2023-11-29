@@ -1,8 +1,22 @@
 #include <iostream>
 
+#include "thread.hpp"
+
+int funcy(int a, int b) {
+    
+    while (a > 0)
+        std::cout << "Thread " << b << " count: " << a-- << std::endl;
+
+
+}
+
 int main(int argc, char* argv[]) {
 
-    std::cout << "Hello multithread!" << std::endl;
+    concurrency::thread tr1(funcy, 5, 1);
+    concurrency::thread tr2(funcy, 5, 2);
 
+    tr1.join();
+    tr2.join();
+    
     return 0;
 }
