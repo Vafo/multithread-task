@@ -33,6 +33,9 @@ public:
     void
     join();
 
+    void
+    detach();
+
     pthread_t&
     get_id() {
         return m_thread_id;

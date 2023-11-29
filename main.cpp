@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     concurrency::thread tr2(funcy, 5, 2);
 
     tr1.join();
-    tr2.join();
+    tr2.detach();
     
     return 0;
 }
