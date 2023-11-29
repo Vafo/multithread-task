@@ -114,7 +114,7 @@ void thread::create_thread(void_func& func_obj) {
 
 void
 thread::join() {
-    int err_num;
+    int err_num = 0;
     err_num = pthread_join(m_thread_id, NULL);
 
     if (err_num != 0) {
@@ -132,7 +132,7 @@ thread::is_joinable() {
 
 void
 thread::detach() {
-    int err_num;
+    int err_num = 0;
     err_num = pthread_detach(m_thread_id);
 
     if (err_num != 0) {

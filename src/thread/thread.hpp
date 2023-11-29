@@ -11,14 +11,17 @@ namespace concurrency {
 class thread {
 
 public:
+    
+    thread(): m_is_joinable(0) {}
+    
     template<typename Callable, typename ...Args>
     explicit
     thread(Callable callb, Args ...args) 
     :   
         m_is_joinable(0)
     {
-
-        auto lambda_func = [callb, args...] () -> void { callb(args...); };
+        // arguments must be invocable after conversion to rvalues (no lvalue references)
+        auto lambda_func = [=] () -> void { callb(args...); };
 
         void_func func(lambda_func);
         create_thread(func);
