@@ -1,8 +1,9 @@
 
 #include "thread.hpp"
 #include <pthread.h>
-#include <assert.h>
 
+#include <assert.h>
+#include <stdexcept>
 
 namespace concurrency {
 

@@ -4,14 +4,14 @@
 #include "function.hpp"
 
 #include <pthread.h>
-#include <exception>
 
 namespace concurrency {
 
 class thread {
 
 public:
-    
+    typedef pthread_t native_handle_type;
+
     thread(): m_is_joinable(0), m_thread_id() {}
     
     template<typename Callable, typename ...Args>
@@ -46,12 +46,12 @@ public:
     void
     detach();
 
-    pthread_t&
+    native_handle_type&
     get_id() {
         return m_thread_id;
     }
 
-    const pthread_t&
+    const native_handle_type&
     get_id() const {
         return m_thread_id;
     }
@@ -59,7 +59,7 @@ public:
 private:
     typedef func::function<void()> void_func;
 
-    pthread_t m_thread_id;
+    native_handle_type m_thread_id;
     int m_is_joinable;
 
     void create_thread(void_func& func_obj);
