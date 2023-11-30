@@ -41,6 +41,47 @@ TEST_CASE("thread: joining thread", "[thread]") {
     REQUIRE(tr.joinable() == true);
 
     tr.join(); 
+
+    REQUIRE(tr.joinable() == false);
+    REQUIRE_THROWS(tr.join());
+
+}
+
+TEST_CASE("jthread: creation and deletion", "[thread]") {
+    const int val_init = 0;
+    int val = val_init;
+    jthread tr_add(increment_by_1, &val);
+
+    REQUIRE_NOTHROW(tr_add.join());
+    REQUIRE(val == val_init + 1);
+}
+
+/* Copy of thread test case */
+TEST_CASE("jthread: empty jthread object", "[thread]") {
+    jthread tr_empty;
+
+    REQUIRE_THROWS(tr_empty.join());
+    REQUIRE_THROWS(tr_empty.detach());
+
+    REQUIRE(tr_empty.joinable() == false);
+
+    thread tr(do_nothing);
+    
+    REQUIRE(tr.joinable() == true);
+
+    tr.join(); 
+
+    REQUIRE(tr.joinable() == false);
+    REQUIRE_THROWS(tr.join());
+}
+
+TEST_CASE("jthread: no explicit join() call", "[thread]") {
+    jthread tr1(do_nothing);
+    int val = 0;
+    jthread tr2(increment_by_1, &val);
+
+    /* should execute terminate on non-joined threads */
+    /* have to add explicit check if this execution happens */
 }
 
 } // namespace concurrency

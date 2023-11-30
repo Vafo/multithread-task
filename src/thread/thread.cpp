@@ -34,7 +34,6 @@ static void* _start_routine(void* arg) {
     
     (routine_args->m_func)();
 
-
     pthread_cleanup_pop(1);
 
     return NULL;

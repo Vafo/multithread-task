@@ -30,6 +30,13 @@ public:
     thread(const thread& other) = delete;
     thread& operator=(const thread& other) = delete;
 
+    /* TODO: Add move assignment so as to assign empty thread objects */
+
+    ~thread() {
+        if(joinable())
+            std::terminate();
+    }
+
     bool
     joinable();
 
@@ -49,11 +56,6 @@ public:
         return m_thread_id;
     }
 
-    ~thread() {
-        if(joinable())
-            std::terminate();
-    }
-
 private:
     typedef func::function<void()> void_func;
 
@@ -62,7 +64,53 @@ private:
 
     void create_thread(void_func& func_obj);
 
-};
+}; // class thread
+
+class jthread {
+
+public:
+    jthread(): m_thread() {}
+
+    template<typename Callable, typename ...Args>
+    jthread(Callable cb, Args ...args): m_thread(cb, args...) {}
+
+    jthread(const jthread& other) = delete;
+    jthread& operator=(const jthread& other) = delete;
+
+    ~jthread() {
+        if(m_thread.joinable()) {
+            m_thread.join();
+        }
+    }
+
+    bool
+    joinable()
+    { return m_thread.joinable(); }
+
+    void
+    join()
+    { m_thread.join(); }
+
+    void
+    detach()
+    { m_thread.detach(); }
+
+    pthread_t&
+    get_id() {
+        return m_thread.get_id();
+    }
+
+    const pthread_t&
+    get_id() const {
+        return m_thread.get_id();
+    }
+
+
+private:
+    thread m_thread;
+    /* TODO: Add stop source support */
+
+}; // class jthread
 
 } // namespace concurrency
 

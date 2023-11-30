@@ -13,10 +13,10 @@ int funcy(int a, int b) {
 int main(int argc, char* argv[]) {
 
     concurrency::thread tr1(funcy, 5, 1);
-    concurrency::thread tr2(funcy, 5, 2);
+    concurrency::jthread tr2(funcy, 5, 2);
 
     tr1.join();
-    tr2.detach();
+    // tr2.detach();
     
     return 0;
 }
