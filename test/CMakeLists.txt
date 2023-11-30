@@ -1,6 +1,6 @@
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_executable(concurrency_test thread_test.cpp)
+add_executable(concurrency_test thread_test.cpp mutex_test.cpp)
 
 target_link_libraries(concurrency_test concurrency_impl compiler_flags)
 # Catch2
