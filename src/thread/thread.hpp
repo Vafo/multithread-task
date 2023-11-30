@@ -12,7 +12,7 @@ class thread {
 
 public:
     
-    thread(): m_is_joinable(0) {}
+    thread(): m_is_joinable(0), m_thread_id() {}
     
     template<typename Callable, typename ...Args>
     explicit
@@ -31,7 +31,7 @@ public:
     thread& operator=(const thread& other) = delete;
 
     bool
-    is_joinable();
+    joinable();
 
     void
     join();
@@ -50,7 +50,7 @@ public:
     }
 
     ~thread() {
-        if(is_joinable())
+        if(joinable())
             std::terminate();
     }
 

@@ -3,7 +3,6 @@
 #include <pthread.h>
 #include <assert.h>
 
-#include <sstream>
 
 namespace concurrency {
 
@@ -126,7 +125,7 @@ thread::join() {
 }
 
 bool
-thread::is_joinable() {
+thread::joinable() {
     return m_is_joinable;
 }
 

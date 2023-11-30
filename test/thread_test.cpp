@@ -34,11 +34,11 @@ TEST_CASE("thread: joining thread", "[thread]") {
     REQUIRE_THROWS(tr_empty.join());
     REQUIRE_THROWS(tr_empty.detach());
 
-    REQUIRE(tr_empty.is_joinable() == false);
+    REQUIRE(tr_empty.joinable() == false);
 
     thread tr(do_nothing);
     
-    REQUIRE(tr.is_joinable() == true);
+    REQUIRE(tr.joinable() == true);
 
     tr.join(); 
 }
