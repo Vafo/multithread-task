@@ -1,9 +1,10 @@
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(thread)
+add_subdirectory(function)
 
-add_library(multithread_impl INTERFACE)
+add_library(concurrency_impl INTERFACE)
 
-target_link_libraries(multithread_impl INTERFACE thread_impl)
+target_link_libraries(concurrency_impl INTERFACE thread_impl function_impl)
 
-target_link_libraries(multithread_impl INTERFACE compiler_flags)
+target_link_libraries(concurrency_impl INTERFACE compiler_flags)
