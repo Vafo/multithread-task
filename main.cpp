@@ -15,12 +15,11 @@ concurrency::mutex val_mutex;
 void incr_func(int amount) {
     int tmp;
     while (amount-- > 0) {
-        val_mutex.lock();
+        concurrency::lock_guard<concurrency::mutex> locker(val_mutex);
         // some redundant work
         tmp = val + 1;
         tmp--;
         val = tmp + 1;
-        val_mutex.unlock();
     }
 }
 
@@ -57,18 +56,13 @@ int main(int argc, char* argv[]) {
     // concurrency::thread tr2(incr_func, 1'000'000);
     // concurrency::thread tr3(incr_func, 1'000'000);
 
-    concurrency::thread tr1(infinite_func, 1);
-    concurrency::thread tr2(infinite_func, 2);
-    concurrency::thread tr3(infinite_func, 3);
-    concurrency::thread tr4(infinite_func, 4);
-    
+    {
+        concurrency::jthread tr1(incr_func, 1'000'000);
+        concurrency::jthread tr2(incr_func, 1'000'000);
+        concurrency::jthread tr3(incr_func, 1'000'000);
+    }
 
-    tr1.join();
-    tr2.join();
-    tr3.join();
-    tr4.join();
-
-    // std::cout << val << std::endl;
+    std::cout << val << std::endl;
 
     return 0;
 }
