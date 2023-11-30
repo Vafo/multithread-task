@@ -127,4 +127,27 @@ TEST_CASE("mutex: unique_lock constructors", "[mutex]") {
     }
 }
 
+TEST_CASE("mutex: lock_guard", "[mutex]") {
+    mutex mut;
+
+    { /*scope*/
+        lock_guard<mutex> scoped_locker(mut);
+        
+        REQUIRE(mut.try_lock() == false);
+    }
+
+    REQUIRE(mut.try_lock() == true);
+    REQUIRE_NOTHROW(mut.unlock());
+
+    // One more time
+    { /*scope*/
+        lock_guard<mutex> scoped_locker(mut);
+        
+        REQUIRE(mut.try_lock() == false);
+    }
+    
+    REQUIRE(mut.try_lock() == true);
+    REQUIRE_NOTHROW(mut.unlock());
+}
+
 } // namespace concurrency

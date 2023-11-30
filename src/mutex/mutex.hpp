@@ -63,6 +63,9 @@ public:
     /*calling thread already locked mutex*/
     unique_lock(mutex_type& mut, adopt_lock_t): m_mutex_ptr(&mut), m_owns(true) {}
 
+    unique_lock(const unique_lock& other) = delete;
+    unique_lock& operator=(const unique_lock& other) = delete;
+
     ~unique_lock() {
         if(m_mutex_ptr && m_owns)
             unlock();
@@ -121,6 +124,25 @@ private:
     bool m_owns;
 
 }; // class unique_lock
+
+template<typename Mutex_T>
+class lock_guard {
+
+public:
+    typedef Mutex_T mutex_type;
+
+    lock_guard(mutex_type& mut): m_mutex_ptr(&mut)
+    { m_mutex_ptr->lock(); }
+
+    lock_guard(mutex_type& mut, adopt_lock_t): m_mutex_ptr(&mut) {}
+
+    ~lock_guard()
+    { m_mutex_ptr->unlock(); }
+
+private:
+    mutex_type* const m_mutex_ptr;
+
+}; // calss lock_guard
 
 } // namespace concurrency
 
