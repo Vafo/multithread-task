@@ -9,23 +9,66 @@
 
 concurrency::mutex cout_mutex;
 
+volatile long val = 0;
+concurrency::mutex val_mutex;
+
+void incr_func(int amount) {
+    int tmp;
+    while (amount-- > 0) {
+        val_mutex.lock();
+        // some redundant work
+        tmp = val + 1;
+        tmp--;
+        val = tmp + 1;
+        val_mutex.unlock();
+    }
+}
+
 void funcy(int a, int b, int sleep_ms) {
     while (a > 0) {
         // cout_mutex.lock();
-        std::cout << "Thread " << b << " count: " << a-- << std::endl;
+        for(int i = 0; i < 3; ++i)
+            std::cout << "Thread " << b << " " << i << " count: " << a << std::endl;
+        --a;
+
         std::this_thread::sleep_for( std::chrono::milliseconds(sleep_ms) );
         // cout_mutex.unlock();
     }
 }
 
+void infinite_func(int tr_idx) {
+    for(;;) {
+        for(int i = 0; i < 25; ++i)
+            std::cout << tr_idx << " ";
+        std::cout << std::endl;
+    }
+}
+
 int main(int argc, char* argv[]) {
 
-    concurrency::thread tr1(funcy, 5, 1, 900);
-    concurrency::thread tr2(funcy, 5, 2, 300);
+    // concurrency::thread tr1(funcy, 5, 1, 900);
+    // concurrency::thread tr2(funcy, 5, 2, 300);
+
+    // tr1.join();
+    // tr2.join();
+    // tr2.detach();
+    
+    // concurrency::thread tr1(incr_func, 1'000'000);
+    // concurrency::thread tr2(incr_func, 1'000'000);
+    // concurrency::thread tr3(incr_func, 1'000'000);
+
+    concurrency::thread tr1(infinite_func, 1);
+    concurrency::thread tr2(infinite_func, 2);
+    concurrency::thread tr3(infinite_func, 3);
+    concurrency::thread tr4(infinite_func, 4);
+    
 
     tr1.join();
     tr2.join();
-    // tr2.detach();
-    
+    tr3.join();
+    tr4.join();
+
+    // std::cout << val << std::endl;
+
     return 0;
 }

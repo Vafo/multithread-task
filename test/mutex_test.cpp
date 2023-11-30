@@ -56,4 +56,75 @@ TEST_CASE("mutex: integration with threads", "[mutex]") {
     REQUIRE(val == real_val);
 }
 
+TEST_CASE("mutex: unique_lock", "[mutex]") {
+    mutex mut;
+
+    unique_lock<mutex> locker(mut);
+
+    REQUIRE(locker.owns_lock() == true);
+    REQUIRE(mut.try_lock() == false);
+
+    REQUIRE_NOTHROW(locker.unlock());
+    REQUIRE(locker.release() == &mut);
+
+
+    REQUIRE(locker.mutex() == nullptr);
+    REQUIRE(locker.owns_lock() == false);
+
+    { /*scope*/
+        unique_lock<mutex> scoped_locker(mut);
+        
+        REQUIRE(scoped_locker.owns_lock() == true);
+        REQUIRE(mut.try_lock() == false);
+    }
+    REQUIRE(mut.try_lock() == true);
+    REQUIRE_NOTHROW(mut.unlock());
+}
+
+TEST_CASE("mutex: unique_lock constructors", "[mutex]") {
+    mutex mut;
+
+    SECTION("defer_lock") {
+        unique_lock<mutex> locker(mut, defer_lock);
+
+        REQUIRE(locker.owns_lock() == false);
+
+        REQUIRE_NOTHROW(locker.lock());
+        REQUIRE_NOTHROW(locker.unlock());
+        REQUIRE(locker.release() == &mut);
+        REQUIRE(locker.mutex() == nullptr);
+    }
+
+    SECTION("try_to_lock") {
+        SECTION("precondition: not locked") {
+            unique_lock<mutex> locker(mut, try_to_lock);
+
+            REQUIRE(locker.owns_lock() == true);
+            REQUIRE(static_cast<bool>(locker) == true);
+            REQUIRE(mut.try_lock() == false);
+        }
+
+        SECTION("precondition: locked") {
+            mut.lock();
+
+            unique_lock<mutex> locker(mut, try_to_lock);
+
+            REQUIRE(locker.owns_lock() == false);
+            REQUIRE(static_cast<bool>(locker) == false);
+            REQUIRE(mut.try_lock() == false);
+        }
+    }
+
+    SECTION("adopt_lock") {
+        // it is implied that mutex is already locked by calling thread
+        mut.lock();
+
+        unique_lock<mutex> locker(mut, adopt_lock);
+
+        REQUIRE(locker.owns_lock() == true);
+        REQUIRE(static_cast<bool>(locker) == true);
+        REQUIRE(mut.try_lock() == false);
+    }
+}
+
 } // namespace concurrency
