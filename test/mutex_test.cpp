@@ -147,6 +147,14 @@ TEST_CASE("mutex: lock_guard", "[mutex]") {
     }
     
     REQUIRE(mut.try_lock() == true);
+    
+    // lock_guard adopts lock
+    { /*scope*/
+        lock_guard<mutex> scoped_locker(mut, adopt_lock);
+        
+        REQUIRE(mut.try_lock() == false);
+    }
+    REQUIRE(mut.try_lock() == true);
     REQUIRE_NOTHROW(mut.unlock());
 }
 
