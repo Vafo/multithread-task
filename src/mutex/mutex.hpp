@@ -156,7 +156,7 @@ public:
 private:
     mutex_type* const m_mutex_ptr;
 
-}; // calss lock_guard
+}; // class lock_guard
 
 } // namespace concurrency
 

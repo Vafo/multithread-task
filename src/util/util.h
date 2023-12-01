@@ -32,6 +32,8 @@ public:
             std::string err_msg = m_err_msg_gen(m_err_prefix, retval);
             throw std::runtime_error(err_msg);
         }
+
+        return retval;
     }
 
 private:
