@@ -2,10 +2,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(thread)
 add_subdirectory(mutex)
+add_subdirectory(condition_variable)
 add_subdirectory(function)
 
 add_library(concurrency_impl INTERFACE)
 
-target_link_libraries(concurrency_impl INTERFACE thread_impl mutex_impl function_impl)
+target_link_libraries(concurrency_impl INTERFACE thread_impl mutex_impl condition_var_impl function_impl)
 
 target_link_libraries(concurrency_impl INTERFACE compiler_flags)
