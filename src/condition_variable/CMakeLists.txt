@@ -7,4 +7,4 @@ target_include_directories(condition_var_impl PUBLIC .)
 # Link mutex
 target_link_libraries(condition_var_impl PUBLIC mutex_impl util_impl)
 # Link pthread
-target_link_libraries(condition_var_impl PUBLIC pthread compiler_flags)
+target_link_libraries(condition_var_impl PUBLIC pthread Concurrency_compiler_flags)
