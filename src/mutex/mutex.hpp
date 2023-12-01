@@ -24,6 +24,10 @@ public:
 
     void unlock();
 
+    native_handle_type*
+    native_handle()
+    { return &m_handle; }
+
 private:
     native_handle_type m_handle;
 
@@ -120,6 +124,13 @@ public:
     { return m_mutex_ptr; }
 
 private:
+    friend class condition_variable;
+    void fake_lock()
+    { m_owns = true; }
+
+    void fake_unlock()
+    { m_owns = false; }
+
     mutex_type* m_mutex_ptr;
     bool m_owns;
 
@@ -135,6 +146,9 @@ public:
     { m_mutex_ptr->lock(); }
 
     lock_guard(mutex_type& mut, adopt_lock_t): m_mutex_ptr(&mut) {}
+
+    lock_guard(const lock_guard& other) = delete;
+    lock_guard& operator=(const lock_guard& other) = delete;
 
     ~lock_guard()
     { m_mutex_ptr->unlock(); }
