@@ -126,4 +126,20 @@ TEST_CASE("jthread: jthreads and unique_lock", "[thread]") {
     REQUIRE(val == iterations * 2);
 }
 
+TEST_CASE("this_thread: get_native_id()", "[thread]") {
+
+    auto ret_id_func = [] (thread::native_handle_type* handle_out) { *handle_out = this_thread::get_native_id(); };
+    thread::native_handle_type handle1, handle2;
+    thread
+        tr1(ret_id_func, &handle1), 
+        tr2(ret_id_func, &handle2);
+
+    tr1.join();
+    tr2.join();
+
+    REQUIRE(tr1.get_id() == handle1);
+    REQUIRE(tr2.get_id() == handle2);
+
+}
+
 } // namespace concurrency

@@ -143,4 +143,12 @@ thread::detach() {
 }
 
 
+namespace this_thread {
+
+thread::native_handle_type get_native_id() {
+    return pthread_self();
+}
+
+}; // namespace this_thread
+
 } // namespace concurrency

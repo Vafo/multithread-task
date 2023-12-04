@@ -112,6 +112,13 @@ private:
 
 }; // class jthread
 
+
+namespace this_thread {
+
+thread::native_handle_type get_native_id();
+
+}; // namespace this_thread
+
 } // namespace concurrency
 
 #endif
