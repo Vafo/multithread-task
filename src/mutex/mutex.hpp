@@ -6,17 +6,17 @@
 
 namespace concurrency {
 
-class mutex {
+class mutex_interface {
 
 public:
     typedef pthread_mutex_t native_handle_type;
 
-    mutex();
+    mutex_interface(): m_handle() {}
 
-    mutex(const mutex& other) = delete;
-    mutex& operator=(const mutex& other) = delete;
+    mutex_interface(const mutex_interface& other) = delete;
+    mutex_interface& operator=(const mutex_interface& other) = delete;
 
-    ~mutex();
+    ~mutex_interface();
 
     void lock();
 
@@ -28,11 +28,26 @@ public:
     native_handle()
     { return &m_handle; }
 
-private:
+protected:
     native_handle_type m_handle;
 
+}; // class mutex_interface 
+
+class mutex: public mutex_interface {
+public:
+    mutex();
+
+    mutex(const mutex& other) = delete;
+    mutex& operator=(const mutex& other) = delete;
 }; // class mutex
 
+class recursive_mutex: public mutex_interface {
+public:
+    recursive_mutex();
+
+    recursive_mutex(const recursive_mutex& other) = delete;
+    recursive_mutex& operator=(const recursive_mutex& other) = delete;
+}; // class recursive_mutex
 
 // Helper classes for unique_lock
 // explicit defer_lock_t() = default;
