@@ -27,6 +27,11 @@ public:
         create_thread(func);
     }
 
+    thread(thread&& other):
+        m_is_joinable(other.m_is_joinable),
+        m_thread_id(other.m_thread_id)
+    {}
+
     thread(const thread& other) = delete;
     thread& operator=(const thread& other) = delete;
 
@@ -73,6 +78,10 @@ public:
 
     template<typename Callable, typename ...Args>
     jthread(Callable cb, Args ...args): m_thread(cb, args...) {}
+
+    jthread(jthread&& other):
+        m_thread( std::move(other.m_thread) )
+    {}
 
     jthread(const jthread& other) = delete;
     jthread& operator=(const jthread& other) = delete;
