@@ -1,6 +1,12 @@
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_library(concurrency_test_suite OBJECT thread_test.cpp mutex_test.cpp condition_var_test.cpp)
+add_library(concurrency_test_suite OBJECT
+    thread_test.cpp
+    mutex_test.cpp
+    condition_var_test.cpp
+    restop_source_test.cpp
+)
+
 target_link_libraries(concurrency_test_suite Catch2::Catch2)
 target_link_libraries(concurrency_test_suite concurrency_impl Concurrency_compiler_flags)
 

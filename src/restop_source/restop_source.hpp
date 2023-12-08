@@ -100,6 +100,7 @@ private:
 
 class restop_source {
 
+public:
     restop_source():
         m_state_ref(*this)
     {}
