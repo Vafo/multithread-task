@@ -1,0 +1,7 @@
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_library(restop_source_impl INTERFACE)
+
+target_include_directories(restop_source_impl INTERFACE .)
+
+target_link_libraries(restop_source_impl INTERFACE Concurrency_compiler_flags)
