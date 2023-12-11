@@ -71,7 +71,7 @@ void condition_variable::wait(unique_lock<mutex>& locker) {
     util::try_call<int> check_call(__FUNCTION__, make_cond_var_err_msg);
     mutex::native_handle_type* native_mutex = locker.mutex()->native_handle();
     /*unlock wrapper*/
-    locker.fake_unlock();
+    // locker.fake_unlock();
     
     check_call(
         pthread_cond_wait(&m_cond_var, native_mutex),
@@ -79,7 +79,7 @@ void condition_variable::wait(unique_lock<mutex>& locker) {
     );
     
     // meeting postcondition of wait
-    locker.fake_lock();
+    // locker.fake_lock();
 }
 
 } // namespace concurrency
