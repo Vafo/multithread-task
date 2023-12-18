@@ -1,6 +1,8 @@
 #ifndef THREAD_H
 #define THREAD_H
 
+#include <iostream>
+
 #include "function.hpp"
 
 #include <pthread.h>
@@ -28,13 +30,30 @@ public:
     }
 
     thread(const thread& other) = delete;
-    thread& operator=(const thread& other) = delete;
+    
+    thread(thread&& other)
+    { swap(other); };
 
     /* TODO: Add move assignment so as to assign empty thread objects */
 
     ~thread() {
         if(joinable())
             std::terminate();
+    }
+
+    thread& operator=(const thread& other) = delete;
+    
+    thread& operator=(thread&& other) {
+        if(joinable())
+            std::terminate();
+        swap(other);
+        return *this;
+    }
+
+    void swap(thread& other) {
+        using std::swap;
+        swap(m_thread_id, other.m_thread_id); 
+        swap(m_is_joinable, other.m_is_joinable);
     }
 
     bool
@@ -56,6 +75,9 @@ public:
         return m_thread_id;
     }
 
+    friend void swap(thread& lhs, thread& rhs)
+    { lhs.swap(rhs); }
+
 private:
     typedef func::function<void()> void_func;
 
@@ -74,13 +96,28 @@ public:
     template<typename Callable, typename ...Args>
     jthread(Callable cb, Args ...args): m_thread(cb, args...) {}
 
+    jthread(jthread&& other): m_thread() {
+        swap(other);
+    }
+
     jthread(const jthread& other) = delete;
-    jthread& operator=(const jthread& other) = delete;
 
     ~jthread() {
         if(m_thread.joinable()) {
             m_thread.join();
         }
+    }
+
+    jthread& operator=(const jthread& other) = delete;
+    
+    jthread& operator=(jthread&& other) {
+        jthread(std::move(other)).swap(*this);
+        return *this;
+    };
+
+    void swap(jthread& other) { 
+        using std::swap;
+        swap(m_thread, other.m_thread);
     }
 
     bool
@@ -105,6 +142,8 @@ public:
         return m_thread.get_id();
     }
 
+    friend void swap(jthread& lhs, jthread& rhs)
+    { lhs.swap(rhs); }
 
 private:
     thread m_thread;
