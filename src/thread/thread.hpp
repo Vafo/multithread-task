@@ -38,14 +38,14 @@ public:
 
     ~thread() {
         if(joinable())
-            std::terminate();
+            throw std::runtime_error("thread: thread was not joined");
     }
 
     thread& operator=(const thread& other) = delete;
     
     thread& operator=(thread&& other) {
         if(joinable())
-            std::terminate();
+            throw std::runtime_error("thread: thread was not joined");
         swap(other);
         return *this;
     }
