@@ -9,6 +9,7 @@ target_compile_features(Concurrency_compiler_flags INTERFACE cxx_std_11)
 
 # Include src folders
 add_subdirectory(src)
+add_subdirectory(modules)
 add_subdirectory(test)
 
 include(FetchContent)

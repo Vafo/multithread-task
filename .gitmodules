@@ -1,0 +1,3 @@
+[submodule "modules/function"]
+	path = modules/function
+	url = https://github.com/Vafo/function.git
