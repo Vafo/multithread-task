@@ -13,14 +13,12 @@ public:
 
     thread()
         : m_thread_id()
-        , m_is_joinable(0)
     { }
     
     template<typename Callable, typename ...Args>
     explicit
     thread(Callable callb, Args ...args) 
         : m_thread_id()
-        , m_is_joinable(0)
     {
         // arguments must be invocable after conversion to rvalues (no lvalue references)
         auto lambda_func = [=] () -> void { callb(args...); };
@@ -51,8 +49,7 @@ public:
 
     void swap(thread& other) {
         using std::swap;
-        swap(m_thread_id, other.m_thread_id); 
-        swap(m_is_joinable, other.m_is_joinable);
+        swap(m_thread_id, other.m_thread_id);
     }
 
     bool joinable();
@@ -77,10 +74,9 @@ public:
 private:
     typedef func::function<void()> void_func;
 
-    native_handle_type m_thread_id;
-    int m_is_joinable;
-
     void create_thread(void_func& func_obj);
+
+    native_handle_type m_thread_id;
 
 }; // class thread
 

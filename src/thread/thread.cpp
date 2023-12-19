@@ -80,7 +80,6 @@ void thread::create_thread(void_func& func_obj) {
     // create heap allocated arguments
     start_routine_args* args = new start_routine_args(func_obj);
 
-    m_is_joinable = 1;
     err_num = pthread_create(&m_thread_id, &attr,
         _start_routine,
         reinterpret_cast<void *>(args)
@@ -88,8 +87,8 @@ void thread::create_thread(void_func& func_obj) {
 
     if(err_num != 0) {
         // revet thread invocation
-        m_is_joinable = 0;
-
+        // m_is_joinable = 0;
+        m_thread_id = native_handle_type();
         // release allocated resources
         delete args;
 
@@ -101,8 +100,9 @@ void thread::create_thread(void_func& func_obj) {
     if(err_num != 0) {
         // revert thread invocation (cancel it)
         pthread_cancel(m_thread_id);
-        m_is_joinable = 0;
-
+        // m_is_joinable = 0;
+        m_thread_id = native_handle_type();
+        
         // release allocated resources
         delete args;
 
@@ -115,18 +115,18 @@ void
 thread::join() {
     int err_num = 0;
     err_num = pthread_join(m_thread_id, NULL);
-
+    
     if (err_num != 0) {
         std::string err_msg = make_pthread_err_msg("thread::join: pthread_join: ", err_num);
         throw std::runtime_error(err_msg);
     }
 
-    m_is_joinable = 0;
+    m_thread_id = native_handle_type(); // reset handle
 }
 
 bool
 thread::joinable() {
-    return m_is_joinable;
+    return m_thread_id != native_handle_type();
 }
 
 void
@@ -139,7 +139,7 @@ thread::detach() {
         throw std::runtime_error(err_msg);
     }
 
-    m_is_joinable = 0;
+    m_thread_id = native_handle_type(); // reset handle
 }
 
 
