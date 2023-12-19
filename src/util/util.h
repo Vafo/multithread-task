@@ -119,14 +119,18 @@ public:
 }; // class cerror_code
 
 
+// Scope deferred execution
 class defer_execution {
 
 public:
+    defer_execution() = delete;
+
+    explicit
     defer_execution(func::function<void()> defered_func)
         : m_func(defered_func)
         , to_execute(true)
     { }
-
+ 
     ~defer_execution() {
         if(to_execute) 
             m_func();
