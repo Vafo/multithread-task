@@ -1,11 +1,39 @@
-
 #include "thread.hpp"
-#include <pthread.h>
 
+#include <pthread.h>
 #include <assert.h>
-#include <stdexcept>
+
+#include "util.h"
 
 namespace concurrency {
+
+// Error Message Generation
+
+static std::string make_pthread_err_msg(std::string prefix, int err_num) {
+    std::string err_msg( std::move(prefix) );
+
+    switch(err_num) {
+        case ESRCH:
+            err_msg += "no thread exists with given ID";
+            break;
+        case EINVAL:
+            err_msg += "thread is not joinable or is being joined";
+            break;
+        case EDEADLK:
+            err_msg += "deadlock detected";
+            break;
+        case EAGAIN:
+            err_msg += "could not allocate resources to create thread";
+            break;
+        default:
+            err_msg += "error code: " + std::to_string(err_num);
+            break;
+    }
+    
+    return err_msg;
+}
+
+// C function & struct parameter for thread (pthread) to execute
 
 struct start_routine_args {
     func::function<void()> m_func;
@@ -43,83 +71,51 @@ static void* _start_routine(void* arg) {
 
 } // extern "C"
 
-static std::string make_pthread_err_msg(std::string prefix, int err_num) {
-    std::string err_msg( std::move(prefix) );
-
-    switch(err_num) {
-        case ESRCH:
-            err_msg += "no thread exists with given ID";
-            break;
-        case EINVAL:
-            err_msg += "thread is not joinable or is being joined";
-            break;
-        case EDEADLK:
-            err_msg += "deadlock detected";
-            break;
-        case EAGAIN:
-            err_msg += "could not allocate resources to create thread";
-            break;
-        default:
-            err_msg += "error code: " + std::to_string(err_num);
-            break;
-    }
-    
-    return err_msg;
-}
 
 void thread::create_thread(void_func& func_obj) {
-    int err_num;
-    pthread_attr_t attr;
-    err_num = pthread_attr_init(&attr);
+    util::cerror_code<int> code(
+        "create_thread: ",
+        make_pthread_err_msg, 0
+    );
 
-    if(err_num != 0) {
-        std::string err_msg = make_pthread_err_msg("create_thread: pthread_attr_init error: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
+    pthread_attr_t attr;
+    code = pthread_attr_init(&attr);
 
     // create heap allocated arguments
     start_routine_args* args = new start_routine_args(func_obj);
-
-    err_num = pthread_create(&m_thread_id, &attr,
+    util::defer_execution def_exec(
+        [&] () -> void {
+            // reset thread id
+            m_thread_id = native_handle_type();
+            // release allocated resources
+            delete args;
+        }
+    );
+    
+    code = pthread_create(&m_thread_id, &attr,
         _start_routine,
         reinterpret_cast<void *>(args)
     );
 
-    if(err_num != 0) {
-        // revet thread invocation
-        // m_is_joinable = 0;
-        m_thread_id = native_handle_type();
-        // release allocated resources
-        delete args;
-
-        std::string err_msg = make_pthread_err_msg("create_thread: pthread_create: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
-
-    err_num = pthread_attr_destroy(&attr);
-    if(err_num != 0) {
-        // revert thread invocation (cancel it)
-        pthread_cancel(m_thread_id);
-        // m_is_joinable = 0;
-        m_thread_id = native_handle_type();
-        
-        // release allocated resources
-        delete args;
-
-        std::string err_msg = make_pthread_err_msg("create_thread: pthread_attr_destroy error: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
+    def_exec.assign(
+        [&] () -> void {
+            // revert thread invocation (cancel it)
+            pthread_cancel(m_thread_id);
+            m_thread_id = native_handle_type();
+        }
+    );
+    
+    code = pthread_attr_destroy(&attr);
+    def_exec.cancel();
 }
 
 void
 thread::join() {
-    int err_num = 0;
-    err_num = pthread_join(m_thread_id, NULL);
-    
-    if (err_num != 0) {
-        std::string err_msg = make_pthread_err_msg("thread::join: pthread_join: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
+    util::cerror_code<int> code(
+        "thread::detach: pthread_detach: ",
+        make_pthread_err_msg, 0
+    );
+    code = pthread_join(m_thread_id, NULL);
 
     m_thread_id = native_handle_type(); // reset handle
 }
@@ -131,13 +127,11 @@ thread::joinable() {
 
 void
 thread::detach() {
-    int err_num = 0;
-    err_num = pthread_detach(m_thread_id);
-
-    if (err_num != 0) {
-        std::string err_msg = make_pthread_err_msg("thread::detach: pthread_detach: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
+    util::cerror_code<int> code(
+        "thread::detach: pthread_detach: ",
+        make_pthread_err_msg, 0
+    );
+    code = pthread_detach(m_thread_id);
 
     m_thread_id = native_handle_type(); // reset handle
 }
