@@ -30,14 +30,14 @@ protected:
         , m_valid_retval(valid_retval)
 
         , m_auto_throw(is_auto_throw)
-        , m_is_valid(true)
+        , m_retval()
     { }
 
 public:
     void operator=(
         func_retval_T retval
     ) {
-        m_is_valid = retval == m_valid_retval;
+        m_retval = retval;
 
         if(m_auto_throw && !valid()) {
             throw_exception();
@@ -45,12 +45,15 @@ public:
     }
 
     void throw_exception() {
-        std::string err_msg = m_err_msg_gen(m_err_prefix, retval);
+        std::string err_msg = m_err_msg_gen(m_err_prefix, m_retval);
         throw std::runtime_error(err_msg);
     }
 
     bool valid() const
-    { return m_is_valid; }
+    { return m_retval == m_valid_retval; }
+
+    func_retval_T value() const
+    { return m_retval; }
 
     operator bool() const
     { return !valid(); }
@@ -61,8 +64,8 @@ private:
     > m_err_msg_gen;
     std::string m_err_prefix;
     func_retval_T m_valid_retval;
+    func_retval_T m_retval;
     bool m_auto_throw;
-    bool m_is_valid;
 };
 
 template<typename func_retval_T>
@@ -82,7 +85,7 @@ public:
             err_prefix,
             err_msg_gen,
             valid_retval,
-            false
+            true /*auto throw*/
         )
     { }
 
@@ -100,7 +103,7 @@ public:
             err_prefix,
             err_msg_gen,
             valid_retval,
-            true
+            false /*no auto throw*/
         )
     { }
 
