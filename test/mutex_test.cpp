@@ -1,9 +1,7 @@
 #include <catch2/catch_all.hpp>
 
-#include "thread.hpp"
 #include "mutex.hpp"
-
-#include <iostream>
+#include "thread.hpp"
 
 namespace concurrency {
 

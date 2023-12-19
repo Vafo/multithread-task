@@ -1,7 +1,5 @@
 #include <catch2/catch_all.hpp>
 
-#include <iostream>
-
 #include "condition_variable.hpp"
 
 #include "thread.hpp"

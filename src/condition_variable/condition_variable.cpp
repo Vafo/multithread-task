@@ -1,7 +1,5 @@
 #include "condition_variable.hpp"
 
-#include <stdexcept>
-
 #include "util.h"
 
 namespace concurrency {
