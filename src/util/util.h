@@ -118,6 +118,33 @@ public:
 
 }; // class cerror_code
 
+
+class defer_execution {
+
+public:
+    defer_execution(func::function<void()> defered_func)
+        : m_func(defered_func)
+        , to_execute(true)
+    { }
+
+    ~defer_execution() {
+        if(to_execute) 
+            m_func();
+    }
+
+    void assign(func::function<void()> defered_func) { 
+        m_func = defered_func;
+        to_execute = true;
+    }
+
+    void cancel()
+    { to_execute = false; }
+
+private:
+    func::function<void()> m_func;
+    bool to_execute;
+}; // class defer_execution
+
 } // namespace concurrency::util
 
 #endif
