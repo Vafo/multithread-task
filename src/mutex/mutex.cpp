@@ -1,9 +1,6 @@
 #include "mutex.hpp"
 
-#include <iostream>
-
 #include <pthread.h>
-#include <stdexcept>
 
 #include "util.h"
 
