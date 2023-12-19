@@ -97,7 +97,7 @@ void thread::create_thread(void_func& func_obj) {
         reinterpret_cast<void *>(args)
     );
 
-    def_exec.assign(
+    def_exec.assign( /*change deferred exec to remove dealloc & add pthread_cancel*/
         [&] () -> void {
             // revert thread invocation (cancel it)
             pthread_cancel(m_thread_id);
@@ -106,7 +106,7 @@ void thread::create_thread(void_func& func_obj) {
     );
     
     code = pthread_attr_destroy(&attr);
-    def_exec.cancel();
+    def_exec.cancel(); /*no exception was called, no need to execute*/
 }
 
 void

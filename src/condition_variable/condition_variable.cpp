@@ -45,17 +45,17 @@ condition_variable::~condition_variable() {
 }
 
 void condition_variable::notify_one() {
-    util::cerror_code<int> code(__FUNCTION__, make_cond_var_err_msg, 0, util::no_auto_throw);
+    util::cerror_code<int> code(__FUNCTION__, make_cond_var_err_msg, 0);
     code = pthread_cond_signal(&m_cond_var);
 }
 
 void condition_variable::notify_all() {
-    util::cerror_code<int> code(__FUNCTION__, make_cond_var_err_msg, 0, util::no_auto_throw);
+    util::cerror_code<int> code(__FUNCTION__, make_cond_var_err_msg, 0);
     code = pthread_cond_broadcast(&m_cond_var);
 }
 
 void condition_variable::wait(unique_lock<mutex>& locker) {
-    util::cerror_code<int> code(__FUNCTION__, make_cond_var_err_msg, 0, util::no_auto_throw);
+    util::cerror_code<int> code(__FUNCTION__, make_cond_var_err_msg, 0);
     mutex::native_handle_type* native_mutex = locker.mutex()->native_handle();
     
     code = pthread_cond_wait(&m_cond_var, native_mutex);

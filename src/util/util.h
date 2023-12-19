@@ -72,6 +72,7 @@ template<typename func_retval_T>
 class cerror_code: public cerror_code_base<func_retval_T> {
     typedef cerror_code_base<func_retval_T> base_class;
 public:
+
     template<
         typename Callable,
         typename err_prefix_T
@@ -97,7 +98,7 @@ public:
         err_prefix_T err_prefix,
         Callable err_msg_gen,
         func_retval_T valid_retval,
-        no_auto_throw_t
+        no_auto_throw_t /*disable auto throw*/
     )
         : base_class (
             err_prefix,
