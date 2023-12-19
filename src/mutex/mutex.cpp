@@ -1,4 +1,5 @@
 #include "mutex.hpp"
+
 #include <pthread.h>
 #include <stdexcept>
 
@@ -60,45 +61,45 @@ static std::string make_mutex_init_err_msg(std::string prefix, int err_num) {
     return err_msg;
 }
 
-mutex_interface::~mutex_interface() {
+basic_mutex::~basic_mutex() {
     /*no need to check for error code*/
     pthread_mutex_destroy(&m_handle);
 }
 
-void mutex_interface::lock() {
+void basic_mutex::lock() {
     int err_num = 0;
     err_num = pthread_mutex_lock(&m_handle);
     if(err_num != 0) {
-        std::string err_msg = make_mutex_lock_err_msg("mutex_interface::lock: pthread_mutex_lock: ", err_num);
+        std::string err_msg = make_mutex_lock_err_msg("basic_mutex::lock: pthread_mutex_lock: ", err_num);
         throw std::runtime_error(err_msg);
     }
 }
 
-bool mutex_interface::try_lock() {
+bool basic_mutex::try_lock() {
     int err_num = 0;
     err_num = pthread_mutex_trylock(&m_handle);
     if(err_num != 0) {
         if(err_num == EBUSY) /*mutex is already locked*/
             return !err_num; /*return zero*/
 
-        std::string err_msg = make_mutex_lock_err_msg("mutex_interface::try_lock: pthread_mutex_trylock: ", err_num);
+        std::string err_msg = make_mutex_lock_err_msg("basic_mutex::try_lock: pthread_mutex_trylock: ", err_num);
         throw std::runtime_error(err_msg);
     }
 
     return !err_num; /*return non zero*/
 }
 
-void mutex_interface::unlock() {
+void basic_mutex::unlock() {
     int err_num = 0;
     err_num = pthread_mutex_unlock(&m_handle);
     if(err_num != 0) {
-        std::string err_msg = make_mutex_lock_err_msg("mutex_interface::unlock: pthread_mutex_unlock: ", err_num);
+        std::string err_msg = make_mutex_lock_err_msg("basic_mutex::unlock: pthread_mutex_unlock: ", err_num);
         throw std::runtime_error(err_msg);
     }
 }
 
 mutex::mutex():
-    mutex_interface()
+    basic_mutex()
 {
     pthread_mutexattr_t mutex_attr;
     int err_num = 0;
@@ -123,7 +124,7 @@ mutex::mutex():
 }
 
 recursive_mutex::recursive_mutex():
-    mutex_interface()
+    basic_mutex()
 {
     pthread_mutexattr_t mutex_attr;
     int err_num = 0;

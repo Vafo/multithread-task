@@ -1,11 +1,8 @@
 #ifndef THREAD_H
 #define THREAD_H
 
-#include <iostream>
-
-#include "function.hpp"
-
 #include <pthread.h>
+#include "function.hpp"
 
 namespace concurrency {
 
@@ -14,13 +11,16 @@ class thread {
 public:
     typedef pthread_t native_handle_type;
 
-    thread(): m_is_joinable(0), m_thread_id() {}
+    thread()
+        : m_thread_id()
+        , m_is_joinable(0)
+    { }
     
     template<typename Callable, typename ...Args>
     explicit
     thread(Callable callb, Args ...args) 
-    :   
-        m_is_joinable(0)
+        : m_thread_id()
+        , m_is_joinable(0)
     {
         // arguments must be invocable after conversion to rvalues (no lvalue references)
         auto lambda_func = [=] () -> void { callb(args...); };
@@ -34,20 +34,19 @@ public:
     thread(thread&& other)
     { swap(other); };
 
-    /* TODO: Add move assignment so as to assign empty thread objects */
-
-    ~thread() {
-        if(joinable())
-            throw std::runtime_error("thread: thread was not joined");
-    }
-
     thread& operator=(const thread& other) = delete;
     
     thread& operator=(thread&& other) {
         if(joinable())
-            throw std::runtime_error("thread: thread was not joined");
+            throw std::runtime_error("thread: operator=: thread was not joined");
         swap(other);
         return *this;
+    }
+    
+    ~thread() noexcept(false) /*TODO: find alternative to suit >c++11*/ {
+        if(joinable())
+            /*since c++11 throw in destructor causes terminate*/
+            throw std::runtime_error("thread: ~thread: thread was not joined");
     }
 
     void swap(thread& other) {
@@ -56,14 +55,11 @@ public:
         swap(m_is_joinable, other.m_is_joinable);
     }
 
-    bool
-    joinable();
+    bool joinable();
 
-    void
-    join();
+    void join();
 
-    void
-    detach();
+    void detach();
 
     native_handle_type&
     get_id() {
@@ -94,19 +90,15 @@ public:
     jthread(): m_thread() {}
 
     template<typename Callable, typename ...Args>
-    jthread(Callable cb, Args ...args): m_thread(cb, args...) {}
+    jthread(Callable cb, Args ...args)
+        : m_thread(cb, args...)
+    { }
 
     jthread(jthread&& other): m_thread() {
         swap(other);
     }
 
     jthread(const jthread& other) = delete;
-
-    ~jthread() {
-        if(m_thread.joinable()) {
-            m_thread.join();
-        }
-    }
 
     jthread& operator=(const jthread& other) = delete;
     
@@ -115,21 +107,24 @@ public:
         return *this;
     };
 
+    ~jthread() {
+        if(m_thread.joinable()) {
+            m_thread.join();
+        }
+    }
+
     void swap(jthread& other) { 
         using std::swap;
         swap(m_thread, other.m_thread);
     }
 
-    bool
-    joinable()
+    bool joinable()
     { return m_thread.joinable(); }
 
-    void
-    join()
+    void join()
     { m_thread.join(); }
 
-    void
-    detach()
+    void detach()
     { m_thread.detach(); }
 
     pthread_t&
@@ -147,7 +142,6 @@ public:
 
 private:
     thread m_thread;
-    /* TODO: Add stop source support */
 
 }; // class jthread
 
