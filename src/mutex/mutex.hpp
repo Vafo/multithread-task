@@ -13,13 +13,15 @@ public:
     typedef pthread_mutex_t native_handle_type;
 
 protected:
-    basic_mutex(): m_handle()
+    basic_mutex()
+    : m_handle()
     {/*no platform-specific mutex is created. created by derived*/}
 
     basic_mutex(const basic_mutex& other) = delete;
-    basic_mutex& operator=(const basic_mutex& other) = delete;
 
     ~basic_mutex();
+    
+    basic_mutex& operator=(const basic_mutex& other) = delete;
 
 public:
     void lock();
@@ -42,6 +44,7 @@ public:
     mutex();
 
     mutex(const mutex& other) = delete;
+    
     mutex& operator=(const mutex& other) = delete;
 }; // class mutex
 
@@ -50,6 +53,7 @@ public:
     recursive_mutex();
 
     recursive_mutex(const recursive_mutex& other) = delete;
+    
     recursive_mutex& operator=(const recursive_mutex& other) = delete;
 }; // class recursive_mutex
 
@@ -71,42 +75,43 @@ public:
     typedef Mutex_T mutex_type;
 
     unique_lock()
-        : m_mutex_ptr(nullptr)
-        , m_owns(false)
+    : m_mutex_ptr(nullptr)
+    , m_owns(false)
     { }
 
+    unique_lock(const unique_lock& other) = delete;
+    
     explicit
     unique_lock(mutex_type& mut)
-        : m_mutex_ptr(&mut)
-        , m_owns(false)
+    : m_mutex_ptr(&mut)
+    , m_owns(false)
     { lock(); }
 
     /*do not lock*/
     unique_lock(mutex_type& mut, defer_lock_t)
-        : m_mutex_ptr(&mut)
-        , m_owns(false)
+    : m_mutex_ptr(&mut)
+    , m_owns(false)
     { }
 
     /*try to lock*/
     unique_lock(mutex_type& mut, try_to_lock_t)
-        : m_mutex_ptr(&mut)
-        , m_owns(false) 
+    : m_mutex_ptr(&mut)
+    , m_owns(false) 
     { m_owns = m_mutex_ptr->try_lock(); }
 
     /*caller thread has already locked mutex*/
     unique_lock(mutex_type& mut, adopt_lock_t)
-        : m_mutex_ptr(&mut)
-        , m_owns(true)
+    : m_mutex_ptr(&mut)
+    , m_owns(true)
     { }
-
-    unique_lock(const unique_lock& other) = delete;
-    unique_lock& operator=(const unique_lock& other) = delete;
 
     ~unique_lock() {
         if(m_mutex_ptr && m_owns)
             unlock();
     }
 
+    unique_lock& operator=(const unique_lock& other) = delete;
+    
     void lock() {
         if(!m_mutex_ptr)
             std::runtime_error("unique_lock: lock: not owning any mutex");
@@ -156,9 +161,9 @@ public:
     { return owns_lock(); }
 
 private:
-
     mutex_type* m_mutex_ptr;
     bool m_owns;
+
 }; // class unique_lock
 
 template<typename Mutex_T>
@@ -167,21 +172,24 @@ class lock_guard {
 public:
     typedef Mutex_T mutex_type;
 
+    lock_guard() = delete;
+
+    lock_guard(const lock_guard& other) = delete;
+    
     lock_guard(mutex_type& mut)
-        : m_mutex_ptr(&mut)
+    : m_mutex_ptr(&mut)
     { m_mutex_ptr->lock(); }
 
     lock_guard(mutex_type& mut, adopt_lock_t)
-        : m_mutex_ptr(&mut)
+    : m_mutex_ptr(&mut)
     { }
-
-    lock_guard(const lock_guard& other) = delete;
-    lock_guard& operator=(const lock_guard& other) = delete;
 
     ~lock_guard() { 
         assert(m_mutex_ptr != nullptr);
         m_mutex_ptr->unlock();
     }
+    
+    lock_guard& operator=(const lock_guard& other) = delete;
 
 private:
     mutex_type* const m_mutex_ptr;
