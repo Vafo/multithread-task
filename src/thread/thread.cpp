@@ -3,7 +3,7 @@
 #include <pthread.h>
 #include <assert.h>
 
-#include "util.h"
+#include "util.hpp"
 
 namespace concurrency {
 

@@ -1,6 +1,6 @@
 #include "condition_variable.hpp"
 
-#include "util.h"
+#include "util.hpp"
 
 namespace concurrency {
 
