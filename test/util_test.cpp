@@ -46,15 +46,15 @@ TEST_CASE("cerror_code: no_auto_throw", "[cerror_code]") {
     REQUIRE_THROWS(code.throw_exception());
 }
 
-TEST_CASE("defer_execution: creation & execution", "[defer_execution]") {
-    defer_execution defered(
+TEST_CASE("scoped_guard: creation & execution", "[scoped_guard]") {
+    scoped_guard defered(
         [] () {
             REQUIRE(true);
         }
     );
 }
 
-TEST_CASE("defer_execution: cancel & assign", "[defer_execution]") {
+TEST_CASE("scoped_guard: cancel & assign", "[scoped_guard]") {
     auto false_func =
         [] () {
             REQUIRE(false);
@@ -66,13 +66,13 @@ TEST_CASE("defer_execution: cancel & assign", "[defer_execution]") {
         };
     
     SECTION("cancel"){
-        defer_execution defered(false_func);
+        scoped_guard defered(false_func);
 
         defered.cancel();
     }
 
     SECTION("assign (reassign)") {
-        defer_execution defered(false_func);
+        scoped_guard defered(false_func);
 
         defered.assign(true_func);
     }

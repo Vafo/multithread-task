@@ -83,7 +83,7 @@ void thread::create_thread(void_func& func_obj) {
 
     // create heap allocated arguments
     start_routine_args* args = new start_routine_args(func_obj);
-    util::defer_execution def_exec(
+    util::scoped_guard def_exec(
         [&] () -> void {
             // reset thread id
             m_thread_id = native_handle_type();
