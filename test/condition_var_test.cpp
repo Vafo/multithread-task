@@ -4,7 +4,9 @@
 
 #include "jthread.hpp"
 #include "thread.hpp"
+
 #include "mutex.hpp"
+#include "lock_guard.hpp"
 
 namespace concurrency {
 

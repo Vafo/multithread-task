@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include "mutex.hpp"
+#include "unique_lock.hpp"
 
 namespace concurrency {
 

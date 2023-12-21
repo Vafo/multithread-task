@@ -1,6 +1,8 @@
 #include <catch2/catch_all.hpp>
 
 #include "mutex.hpp"
+#include "unique_lock.hpp"
+#include "lock_guard.hpp"
 #include "thread.hpp"
 
 namespace concurrency {
