@@ -15,10 +15,11 @@ public:
     condition_variable();
 
     condition_variable(const condition_variable& other) = delete;
-    condition_variable& operator=(const condition_variable& other) = delete;
 
     ~condition_variable();
 
+    condition_variable& operator=(const condition_variable& other) = delete;
+    
     void notify_one();
 
     void notify_all();
