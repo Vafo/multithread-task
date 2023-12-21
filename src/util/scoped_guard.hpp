@@ -11,6 +11,8 @@ class scoped_guard {
 public:
     scoped_guard() = delete;
 
+    scoped_guard(const scoped_guard& other) = delete;
+
     explicit
     scoped_guard(func::function<void()> defered_func)
         : m_func(defered_func)
@@ -21,6 +23,8 @@ public:
         if(to_execute) 
             m_func();
     }
+
+    scoped_guard& operator=(const scoped_guard& other) = delete;
 
     void assign(func::function<void()> defered_func) { 
         m_func = defered_func;

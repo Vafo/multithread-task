@@ -19,7 +19,7 @@ protected:
 
     cerror_code_base() = delete;
     
-    cerror_code_base(const cerror_code_base& other) = delete;
+    cerror_code_base(const cerror_code_base& other) = default;
 
     template<
         typename Callable,
