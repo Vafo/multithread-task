@@ -2,6 +2,7 @@
 
 #include "condition_variable.hpp"
 
+#include "jthread.hpp"
 #include "thread.hpp"
 #include "mutex.hpp"
 

@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "jthread.hpp"
 #include "thread.hpp"
 #include "mutex.hpp"
 #include "condition_variable.hpp"

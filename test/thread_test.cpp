@@ -3,6 +3,7 @@
 #include <atomic>
 
 #include "thread.hpp"
+#include "jthread.hpp"
 #include "mutex.hpp"
 #include "condition_variable.hpp"
 
