@@ -1,8 +1,12 @@
 #include "mutex.hpp"
+
 #include <pthread.h>
-#include <stdexcept>
+
+#include "util.hpp"
 
 namespace concurrency {
+
+// Error Message Generation
 
 static std::string make_mutex_lock_err_msg(std::string prefix, int err_num) {
     std::string err_msg( std::move(prefix) );
@@ -60,97 +64,73 @@ static std::string make_mutex_init_err_msg(std::string prefix, int err_num) {
     return err_msg;
 }
 
-mutex_interface::~mutex_interface() {
+
+basic_mutex::~basic_mutex() {
     /*no need to check for error code*/
     pthread_mutex_destroy(&m_handle);
 }
 
-void mutex_interface::lock() {
-    int err_num = 0;
-    err_num = pthread_mutex_lock(&m_handle);
-    if(err_num != 0) {
-        std::string err_msg = make_mutex_lock_err_msg("mutex_interface::lock: pthread_mutex_lock: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
+void basic_mutex::lock() {
+    util::cerror_code<int> code(
+        "basic_mutex::lock: pthread_mutex_lock: ",
+        make_mutex_lock_err_msg, 0
+    );
+    
+    code = pthread_mutex_lock(&m_handle);
 }
 
-bool mutex_interface::try_lock() {
-    int err_num = 0;
-    err_num = pthread_mutex_trylock(&m_handle);
-    if(err_num != 0) {
-        if(err_num == EBUSY) /*mutex is already locked*/
-            return !err_num; /*return zero*/
+bool basic_mutex::try_lock() {
+    util::cerror_code<int> code(
+        "basic_mutex::try_lock: pthread_mutex_trylock: ",
+        make_mutex_lock_err_msg, 0, util::no_auto_throw
+    );
+    code = pthread_mutex_trylock(&m_handle);
+    if(code) {
+        if(code.value() == EBUSY) /*mutex is already locked*/
+            return false; /*lock failed*/
 
-        std::string err_msg = make_mutex_lock_err_msg("mutex_interface::try_lock: pthread_mutex_trylock: ", err_num);
-        throw std::runtime_error(err_msg);
+        code.throw_exception();
     }
 
-    return !err_num; /*return non zero*/
+    return true; /*lock success*/
 }
 
-void mutex_interface::unlock() {
-    int err_num = 0;
-    err_num = pthread_mutex_unlock(&m_handle);
-    if(err_num != 0) {
-        std::string err_msg = make_mutex_lock_err_msg("mutex_interface::unlock: pthread_mutex_unlock: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
+void basic_mutex::unlock() {
+    util::cerror_code<int> code(
+        "basic_mutex::unlock: pthread_mutex_unlock: ",
+        make_mutex_lock_err_msg, 0
+    );
+
+    code = pthread_mutex_unlock(&m_handle);
 }
 
 mutex::mutex():
-    mutex_interface()
+    basic_mutex()
 {
     pthread_mutexattr_t mutex_attr;
-    int err_num = 0;
+    util::cerror_code<int> code(
+        "mutex::mutex: ",
+        make_mutex_init_err_msg, 0
+    );
     
-    err_num = pthread_mutexattr_init(&mutex_attr);
-    if(err_num != 0) {
-        std::string err_msg = make_mutex_init_err_msg("mutex::mutex: pthread_mutexattr_init: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
-
-    err_num = pthread_mutex_init(&m_handle, &mutex_attr);
-    if(err_num != 0) {
-        std::string err_msg = make_mutex_init_err_msg("mutex::mutex: pthread_mutex_init: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
-
-    err_num = pthread_mutexattr_destroy(&mutex_attr);
-    if(err_num != 0) {
-        std::string err_msg = make_mutex_init_err_msg("mutex::mutex: pthread_mutexattr_destroy: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
+    code = pthread_mutexattr_init(&mutex_attr);
+    code = pthread_mutex_init(&m_handle, &mutex_attr);
+    code = pthread_mutexattr_destroy(&mutex_attr);
 }
 
 recursive_mutex::recursive_mutex():
-    mutex_interface()
+    basic_mutex()
 {
     pthread_mutexattr_t mutex_attr;
-    int err_num = 0;
+    util::cerror_code<int> code(
+        "recursive_mutex::recursive_mutex",
+        make_mutex_init_err_msg, 0
+    );
     
-    err_num = pthread_mutexattr_init(&mutex_attr);
-    if(err_num != 0) {
-        std::string err_msg = make_mutex_init_err_msg("recursive_mutex::recursive_mutex: pthread_mutexattr_init: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
-
-    err_num = pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE);
-    if(err_num != 0) {
-        std::string err_msg = make_mutex_init_err_msg("recursive_mutex::recursive_mutex: pthread_mutexattr_settype: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
-
-    err_num = pthread_mutex_init(&m_handle, &mutex_attr);
-    if(err_num != 0) {
-        std::string err_msg = make_mutex_init_err_msg("recursive_mutex::recursive_mutex: pthread_mutex_init: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
-
-    err_num = pthread_mutexattr_destroy(&mutex_attr);
-    if(err_num != 0) {
-        std::string err_msg = make_mutex_init_err_msg("recursive_mutex::recursive_mutex: pthread_mutexattr_destroy: ", err_num);
-        throw std::runtime_error(err_msg);
-    }
+    code = pthread_mutexattr_init(&mutex_attr);
+    code = pthread_mutexattr_settype(&mutex_attr, PTHREAD_MUTEX_RECURSIVE);
+    code = pthread_mutex_init(&m_handle, &mutex_attr);
+    code = pthread_mutexattr_destroy(&mutex_attr);
 }
 
 } // namespace concurrency

@@ -1,7 +1,11 @@
 #include <iostream>
 
+#include "jthread.hpp"
 #include "thread.hpp"
+
 #include "mutex.hpp"
+#include "lock_guard.hpp"
+
 #include "condition_variable.hpp"
 
 concurrency::mutex cout_mutex;

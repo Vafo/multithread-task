@@ -1,7 +1,14 @@
 #include <catch2/catch_all.hpp>
 
+#include <atomic>
+
 #include "thread.hpp"
+#include "jthread.hpp"
+
 #include "mutex.hpp"
+#include "lock_guard.hpp"
+
+#include "condition_variable.hpp"
 
 namespace concurrency {
 
@@ -127,18 +134,43 @@ TEST_CASE("jthread: jthreads and unique_lock", "[thread]") {
 }
 
 TEST_CASE("this_thread: get_native_id()", "[thread]") {
+    const int threads_num = 10;
+    mutex wait_mutex;
+    condition_variable wait_cv;
+    std::atomic<int> counter(0);
 
-    auto ret_id_func = [] (thread::native_handle_type* handle_out) { *handle_out = this_thread::get_native_id(); };
-    thread::native_handle_type handle1, handle2;
-    thread
-        tr1(ret_id_func, &handle1), 
-        tr2(ret_id_func, &handle2);
+    auto ret_id_func = 
+        [&] (thread::native_handle_type* handle_out) { 
+            *handle_out = this_thread::get_native_id(); 
+            ++counter;
+            if(counter == threads_num) {
+                unique_lock<mutex> lock(wait_mutex);
+                wait_cv.notify_one();
+            }
+        };
+    std::array<thread::native_handle_type, threads_num> thread_handles;
+    std::array<thread, threads_num> threads;
+    
+    for(int i = 0; i < threads_num; ++i)
+        threads[i] = thread(ret_id_func, &thread_handles[i]);
 
-    tr1.join();
-    tr2.join();
+    {
+        unique_lock<mutex> lock(wait_mutex);
+        wait_cv.wait(
+            lock,
+            [&] ()
+            { return counter == threads_num; }
+        );
+    }
 
-    REQUIRE(tr1.get_id() == handle1);
-    REQUIRE(tr2.get_id() == handle2);
+    for(int i = 0; i < threads_num; ++i)
+        REQUIRE( threads[i].get_id() == thread_handles[i] );
+
+    for(int i = 0; i < threads_num; ++i)
+        threads[i].join();
+
+    for(int i = 0; i < threads_num; ++i)
+        REQUIRE( threads[i].get_id() == thread::native_handle_type() );
 
 }
 

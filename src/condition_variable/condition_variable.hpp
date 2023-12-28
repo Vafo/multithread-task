@@ -3,21 +3,27 @@
 
 #include <pthread.h>
 #include "mutex.hpp"
+#include "unique_lock.hpp"
 
 namespace concurrency {
 
 class condition_variable {
-
 public:
     typedef pthread_cond_t native_type;
 
-    condition_variable();
+private:
+    native_type m_cond_var;
 
+private:
     condition_variable(const condition_variable& other) = delete;
     condition_variable& operator=(const condition_variable& other) = delete;
 
+public:
+    condition_variable();
+
     ~condition_variable();
 
+public:
     void notify_one();
 
     void notify_all();
@@ -30,11 +36,9 @@ public:
             wait(lock);
     }
 
+public:
     native_type* native_handle()
     { return &m_cond_var; }
-
-private:
-    native_type m_cond_var;
 
 }; // class condition_variable
 
