@@ -7,12 +7,16 @@ namespace concurrency::util {
 
 // Scope deferred execution
 class scoped_guard {
+private:
+    func::function<void()> m_func;
+    bool to_execute;
+
+private:
+    scoped_guard() = delete;
+    scoped_guard(const scoped_guard& other) = delete;
+    scoped_guard& operator=(const scoped_guard& other) = delete;
 
 public:
-    scoped_guard() = delete;
-
-    scoped_guard(const scoped_guard& other) = delete;
-
     explicit
     scoped_guard(func::function<void()> defered_func)
         : m_func(defered_func)
@@ -24,8 +28,7 @@ public:
             m_func();
     }
 
-    scoped_guard& operator=(const scoped_guard& other) = delete;
-
+public:
     void assign(func::function<void()> defered_func) { 
         m_func = defered_func;
         to_execute = true;
@@ -34,9 +37,6 @@ public:
     void cancel()
     { to_execute = false; }
 
-private:
-    func::function<void()> m_func;
-    bool to_execute;
 }; // class scoped_guard
 
 } // namespace concurrency::util

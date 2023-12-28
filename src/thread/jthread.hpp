@@ -6,6 +6,12 @@
 namespace concurrency {
 
 class jthread {
+private:
+    thread m_thread;
+
+private:
+    jthread(const jthread& other) = delete;
+    jthread& operator=(const jthread& other) = delete;
 
 public:
     jthread()
@@ -20,7 +26,10 @@ public:
     jthread(jthread&& other): m_thread()
     { swap(other); }
 
-    jthread(const jthread& other) = delete;
+    jthread& operator=(jthread&& other) {
+        jthread(std::move(other)).swap(*this); // move to tmp & swap
+        return *this;
+    };
 
     ~jthread() {
         if(m_thread.joinable()) {
@@ -28,22 +37,17 @@ public:
         }
     }
 
-    jthread& operator=(const jthread& other) = delete;
-    
-    jthread& operator=(jthread&& other) {
-        jthread(std::move(other)).swap(*this); // move to tmp & swap
-        return *this;
-    };
-
-    bool joinable()
-    { return m_thread.joinable(); }
-
+public:
     void join()
     { m_thread.join(); }
 
     void detach()
     { m_thread.detach(); }
 
+    bool joinable()
+    { return m_thread.joinable(); }
+
+public:
     pthread_t&
     get_id()
     { return m_thread.get_id(); }
@@ -52,6 +56,7 @@ public:
     get_id() const
     { return m_thread.get_id(); }
 
+public:
     void swap(jthread& other) { 
         using std::swap;
         swap(m_thread, other.m_thread);
@@ -59,9 +64,6 @@ public:
 
     friend void swap(jthread& lhs, jthread& rhs)
     { lhs.swap(rhs); }
-
-private:
-    thread m_thread;
 
 }; // class jthread
 
