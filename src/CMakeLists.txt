@@ -3,7 +3,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_subdirectory(thread)
 add_subdirectory(mutex)
 add_subdirectory(condition_variable)
-# add_subdirectory(function)
+add_subdirectory(common)
 add_subdirectory(util)
 
 add_library(concurrency_impl INTERFACE)
