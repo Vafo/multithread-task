@@ -23,7 +23,7 @@ protected:
         : m_handle()
     {/*no mutex is created. created by derived*/}
 
-    ~basic_mutex();
+    virtual ~basic_mutex();
 
 public:
     void lock();

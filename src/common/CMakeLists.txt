@@ -1,0 +1,2 @@
+add_library(concurrency_common INTERFACE)
+target_include_directories(concurrency_common INTERFACE .)

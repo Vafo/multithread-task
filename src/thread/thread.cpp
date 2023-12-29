@@ -4,34 +4,9 @@
 #include <assert.h>
 
 #include "util.hpp"
+#include "concurrency_common.hpp"
 
 namespace concurrency {
-
-// Error Message Generation
-
-static std::string make_pthread_err_msg(std::string prefix, int err_num) {
-    std::string err_msg( std::move(prefix) );
-
-    switch(err_num) {
-        case ESRCH:
-            err_msg += "no thread exists with given ID";
-            break;
-        case EINVAL:
-            err_msg += "thread is not joinable or is being joined";
-            break;
-        case EDEADLK:
-            err_msg += "deadlock detected";
-            break;
-        case EAGAIN:
-            err_msg += "could not allocate resources to create thread";
-            break;
-        default:
-            err_msg += "error code: " + std::to_string(err_num);
-            break;
-    }
-    
-    return err_msg;
-}
 
 // C function & struct parameter for thread (pthread) to execute
 
@@ -73,48 +48,38 @@ static void* _start_routine(void* arg) {
 
 
 void thread::create_thread(void_func& func_obj) {
-    util::cerror_code<int> code(
-        "create_thread: ",
-        make_pthread_err_msg, 0
-    );
+    util::posix_error_throws code(__FUNCTION__);
 
     pthread_attr_t attr;
     code = pthread_attr_init(&attr);
 
-    // create heap allocated arguments
-    start_routine_args* args = new start_routine_args(func_obj);
-    util::scoped_guard def_exec(
-        [&] () -> void {
-            // reset thread id
-            m_thread_id = native_handle_type();
-            // release allocated resources
-            delete args;
-        }
-    );
+    util::scoped_ptr<start_routine_args> guard( /*args guard*/
+        new start_routine_args(func_obj));
     
-    code = pthread_create(&m_thread_id, &attr,
+    native_handle_type tmp_thread_id;
+    code = pthread_create(&tmp_thread_id, &attr,
         _start_routine,
-        reinterpret_cast<void *>(args)
+        reinterpret_cast<void *>(guard.get())
     );
 
-    def_exec.assign( /*change deferred exec to remove dealloc & add pthread_cancel*/
+    util::scoped_guard
+    def_exec( /*if attr_destroy fails*/
         [&] () -> void {
             // revert thread invocation (cancel it)
-            pthread_cancel(m_thread_id);
-            m_thread_id = native_handle_type();
+            pthread_cancel(tmp_thread_id);
         }
     );
     
     code = pthread_attr_destroy(&attr);
-    def_exec.cancel(); /*no exception was called, no need to execute*/
+    
+    m_thread_id = tmp_thread_id; /*store thread_id*/
+    util::scoped_release(guard, def_exec);
 }
 
 void
 thread::join() {
-    util::cerror_code<int> code(
-        "thread::detach: pthread_detach: ",
-        make_pthread_err_msg, 0
-    );
+    util::posix_error_throws code(__FUNCTION__);
+
     code = pthread_join(m_thread_id, NULL);
 
     m_thread_id = native_handle_type(); // reset handle
@@ -127,10 +92,8 @@ thread::joinable() {
 
 void
 thread::detach() {
-    util::cerror_code<int> code(
-        "thread::detach: pthread_detach: ",
-        make_pthread_err_msg, 0
-    );
+    util::posix_error_throws code(__FUNCTION__);
+
     code = pthread_detach(m_thread_id);
 
     m_thread_id = native_handle_type(); // reset handle
