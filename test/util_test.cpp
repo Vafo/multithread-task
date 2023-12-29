@@ -3,6 +3,7 @@
 #include <string>
 
 #include "util.hpp"
+#include "concurrency_common.hpp"
 
 namespace concurrency::util {
 
@@ -15,7 +16,7 @@ TEST_CASE("cerror_code: creation", "[cerror_code]") {
     const int invalid_val = 123;
     static_assert(valid_val != invalid_val);
 
-    cerror_code<int> code("func", error_msg_gen, valid_val);
+    cerror_code<int> code("func", error_msg_gen, valid_val, true);
     
     REQUIRE_THROWS(code = invalid_val);
     REQUIRE(!code.valid());
@@ -33,7 +34,7 @@ TEST_CASE("cerror_code: no_auto_throw", "[cerror_code]") {
 
     cerror_code<int> code(
         "func", error_msg_gen,
-        valid_val, no_auto_throw
+        valid_val, false
     );
 
     REQUIRE_NOTHROW(code = invalid_val);
@@ -44,6 +45,40 @@ TEST_CASE("cerror_code: no_auto_throw", "[cerror_code]") {
     REQUIRE_NOTHROW(code = valid_val);
     REQUIRE_FALSE(code); /*valid retval*/
     REQUIRE_THROWS(code.throw_exception());
+}
+
+/*Copy of cerror_code tests*/
+TEST_CASE("posix_error: default", "[posix_error]") {
+    const int valid_val = 0;
+    const int invalid_val = 123;
+    static_assert(valid_val != invalid_val);
+
+    posix_error code(__FUNCTION__);
+
+    REQUIRE_NOTHROW(code = invalid_val);
+
+    REQUIRE(code); /*invalid retval*/
+    REQUIRE_THROWS(code.throw_exception());
+
+    REQUIRE_NOTHROW(code = valid_val);
+    REQUIRE_FALSE(code); /*valid retval*/
+    REQUIRE_THROWS(code.throw_exception());
+}
+
+TEST_CASE("posix_error_throws: test", "[posix_error]") {
+    const int valid_val = 0;
+    const int invalid_val = 123;
+    static_assert(valid_val != invalid_val);
+
+    posix_error_throws code(__FUNCTION__);
+    
+    REQUIRE_THROWS(code = invalid_val);
+    REQUIRE(!code.valid());
+    REQUIRE(code.value() == invalid_val);
+
+    REQUIRE_NOTHROW(code = valid_val);
+    REQUIRE(code.valid());
+    REQUIRE(code.value() == valid_val);
 }
 
 TEST_CASE("scoped_guard: creation & execution", "[scoped_guard]") {
