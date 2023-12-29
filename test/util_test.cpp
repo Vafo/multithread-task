@@ -100,10 +100,10 @@ TEST_CASE("scoped_guard: cancel & assign", "[scoped_guard]") {
             REQUIRE(true);
         };
     
-    SECTION("cancel"){
+    SECTION("release"){
         scoped_guard defered(false_func);
 
-        defered.cancel();
+        defered.release();
     }
 
     SECTION("assign (reassign)") {
