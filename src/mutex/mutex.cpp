@@ -36,8 +36,9 @@ void basic_mutex::unlock() {
     code = pthread_mutex_unlock(&m_handle);
 }
 
-mutex::mutex():
-    basic_mutex()
+
+mutex::mutex()
+    : basic_mutex()
 {
     util::posix_error_throws code(__FUNCTION__);
     pthread_mutexattr_t mutex_attr;
@@ -47,8 +48,8 @@ mutex::mutex():
     code = pthread_mutexattr_destroy(&mutex_attr);
 }
 
-recursive_mutex::recursive_mutex():
-    basic_mutex()
+recursive_mutex::recursive_mutex()
+    : basic_mutex()
 {
     util::posix_error_throws code(__FUNCTION__);
     pthread_mutexattr_t mutex_attr;
