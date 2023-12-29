@@ -1,7 +1,7 @@
 #ifndef CHECKED_DELETE_H
 #define CHECKED_DELETE_H
 
-namespace memory {
+namespace concurrency {
 
 /**
  * Checked Delete Idiom

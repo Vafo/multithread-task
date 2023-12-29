@@ -5,7 +5,7 @@
 
 #include "checked_delete.hpp"
 
-namespace memory {
+namespace concurrency::util {
 
 template<
     typename T,
@@ -65,6 +65,6 @@ inline void scoped_release(Arg1& arg1, Args&... args) {
     scoped_release(args...);
 }
 
-} // namespace memory
+} // namespace concurrency::util
 
 #endif
