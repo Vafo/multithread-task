@@ -9,7 +9,6 @@
 namespace concurrency {
 
 // C function & struct parameter for thread (pthread) to execute
-
 struct start_routine_args {
     func::function<void()> m_func;
 
@@ -36,7 +35,11 @@ static void* _start_routine(void* arg) {
 
     start_routine_args* routine_args = reinterpret_cast<start_routine_args*>(arg);
     
-    (routine_args->m_func)();
+	try {
+		(routine_args->m_func)();
+	} catch(...) {
+		std::terminate();
+	}
 
     pthread_cleanup_pop(1);
 
