@@ -125,6 +125,22 @@ TEST_CASE("mutex: unique_lock constructors", "[mutex]") {
         REQUIRE(static_cast<bool>(locker) == true);
         REQUIRE(mut.try_lock() == false);
     }
+
+	SECTION("sink lock using move") {
+		unique_lock<mutex> lk(mut);
+		REQUIRE(lk.owns_lock());
+
+		{
+			unique_lock<mutex> sink(std::move(lk));
+			REQUIRE(sink.owns_lock());
+			REQUIRE(!lk.owns_lock());
+		}
+
+		REQUIRE_THROWS(lk.unlock());
+		REQUIRE_THROWS(lk.lock());
+		REQUIRE_NOTHROW(lk = unique_lock<mutex>(mut));
+		REQUIRE(lk.owns_lock());
+	}
 }
 
 TEST_CASE("mutex: lock_guard", "[mutex]") {

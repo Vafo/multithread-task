@@ -32,6 +32,7 @@ public:
 
 	unique_lock& operator=(unique_lock&& other) {
 		unique_lock(std::move(other)).swap(*this);
+		return *this;
 	}
 
     ~unique_lock() {
@@ -68,9 +69,9 @@ public:
 public:
     void lock() {
         if(!m_mutex_ptr)
-            std::runtime_error("unique_lock: lock: not owning any mutex");
+            throw std::runtime_error("unique_lock: lock: not owning any mutex");
         if(m_owns)
-            std::runtime_error("unique_lock: lock: recursive lock"); /*what if mutex_type is recursive_mutex ? template specialization*/
+            throw std::runtime_error("unique_lock: lock: recursive lock"); /*what if mutex_type is recursive_mutex ? template specialization*/
         
         m_mutex_ptr->lock();
         m_owns = true;
@@ -78,16 +79,16 @@ public:
 
     bool try_lock() {
         if(!m_mutex_ptr)
-            std::runtime_error("unique_lock: lock: not owning any mutex");
+            throw std::runtime_error("unique_lock: lock: not owning any mutex");
         if(m_owns)
-            std::runtime_error("unique_lock: lock: recursive lock");
+            throw std::runtime_error("unique_lock: lock: recursive lock");
         
         return m_owns = m_mutex_ptr->try_lock();
     }
 
     void unlock() {
-        if(!m_owns)
-            std::runtime_error("unique_lock: unlock: not owning a mutex to unlock it");
+        if(!owns_lock())
+            throw std::runtime_error("unique_lock: unlock: not owning a mutex to unlock it");
         else if(m_mutex_ptr) {
             m_mutex_ptr->unlock();
             m_owns = false;
@@ -110,7 +111,7 @@ public:
 public:
     bool
     owns_lock() const
-    { return m_owns; }
+    { return m_owns && (m_mutex_ptr != nullptr); }
 
     explicit 
     operator bool() const
