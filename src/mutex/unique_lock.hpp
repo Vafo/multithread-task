@@ -2,6 +2,7 @@
 #define UNIQUE_LOCK_H
 
 #include "mutex_common.hpp"
+#include <stdexcept>
 
 namespace concurrency {
 
@@ -23,13 +24,15 @@ public:
         : m_mutex_ptr(nullptr)
         , m_owns(false)
     {}
-    
-    explicit
-    unique_lock(mutex_type& mut)
-        : m_mutex_ptr(&mut)
-        , m_owns(false)
-    { lock(); }
+   
+	unique_lock(unique_lock&& other)
+		: m_mutex_ptr(other.m_mutex_ptr)
+		, m_owns(other.m_owns)
+	{ other.release(); }
 
+	unique_lock& operator=(unique_lock&& other) {
+		unique_lock(std::move(other)).swap(*this);
+	}
 
     ~unique_lock() {
         if(m_mutex_ptr && m_owns)
@@ -37,6 +40,13 @@ public:
     }
 
 public:
+	/* lock */
+    explicit
+    unique_lock(mutex_type& mut)
+        : m_mutex_ptr(&mut)
+        , m_owns(false)
+    { lock(); }
+
     /*do not lock*/
     unique_lock(mutex_type& mut, defer_lock_t)
         : m_mutex_ptr(&mut)
@@ -105,6 +115,17 @@ public:
     explicit 
     operator bool() const
     { return owns_lock(); }
+
+public:
+	void swap(unique_lock& other) {
+		using std::swap;
+		swap(m_mutex_ptr, other.m_mutex_ptr);
+		swap(m_owns, other.m_owns);
+	}
+
+	friend
+	void swap(unique_lock& a, unique_lock& b)
+	{ a.swap(b); }
 
 }; // class unique_lock
 
