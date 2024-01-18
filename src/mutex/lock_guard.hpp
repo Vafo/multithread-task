@@ -1,6 +1,8 @@
 #ifndef LOCK_GUARD_H
 #define LOCK_GUARD_H
 
+#include <cassert>
+
 #include "mutex_common.hpp"
 
 namespace concurrency {
