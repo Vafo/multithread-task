@@ -20,8 +20,6 @@ private:
 
 private:
     cerror_code() = delete;
-    cerror_code(const cerror_code& other) = default;
-    cerror_code operator=(const cerror_code& other) = delete;
 
 public:
     template<
